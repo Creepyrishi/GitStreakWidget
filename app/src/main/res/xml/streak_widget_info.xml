@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:configure="com.rishi.githubstreak.widget.WidgetConfigActivity"
+    android:description="@string/streak_widget_description"
+    android:initialLayout="@layout/glance_default_loading_layout"
+    android:minHeight="110dp"
+    android:minWidth="160dp"
+    android:previewImage="@drawable/widget_preview_streak"
+    android:previewLayout="@layout/widget_preview_streak"
+    android:resizeMode="horizontal|vertical"
+    android:targetCellHeight="2"
+    android:targetCellWidth="2"
+    android:updatePeriodMillis="14400000"
+    android:widgetCategory="home_screen"
+    android:widgetFeatures="reconfigurable" />

@@ -3,7 +3,10 @@ package com.rishi.githubstreak
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,246 +14,177 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.glance.appwidget.updateAll
-import com.rishi.githubstreak.data.AppState
-import com.rishi.githubstreak.data.GithubContributionClient
-import com.rishi.githubstreak.data.SettingsRepository
-import com.rishi.githubstreak.data.StreakStatus
-import com.rishi.githubstreak.widget.GithubStreakWidget
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.lifecycle.lifecycleScope
+import com.rishi.githubstreak.data.AppData
+import com.rishi.githubstreak.data.ProfileRepository
+import com.rishi.githubstreak.ui.ProfilesScreen
+import com.rishi.githubstreak.ui.WidgetsScreen
+import com.rishi.githubstreak.ui.theme.GithubTheme
+import com.rishi.githubstreak.ui.theme.LocalGithubPalette
+import com.rishi.githubstreak.widget.WidgetInventory
 import com.rishi.githubstreak.worker.RefreshStreakWorker
-import java.text.DateFormat
-import java.util.Date
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val repository = SettingsRepository.get(this)
+        val repository = ProfileRepository.get(this)
         RefreshStreakWorker.enqueuePeriodic(this)
 
+        // Redraw placed widgets on every launch. It costs no network and lets a widget whose
+        // bitmap was rendered under the other system theme pick the right colours back up.
+        lifecycleScope.launch { WidgetInventory.refreshAll(applicationContext) }
+
         setContent {
-            GithubStreakTheme {
-                GithubStreakScreen(repository = repository)
+            GithubTheme {
+                val data by repository.appData.collectAsState(initial = AppData())
+                GithubStreakApp(data = data, repository = repository)
             }
         }
     }
 }
 
-@Composable
-private fun GithubStreakTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = lightColorScheme(
-            primary = Color(0xFF2F6F3E),
-            secondary = Color(0xFFE58A2F),
-            background = Color(0xFFFFF9EA),
-            surface = Color(0xFFFFF9EA),
-            surfaceVariant = Color(0xFFFFF0C2),
-        ),
-        content = content,
-    )
+private enum class HomeTab(val label: String) {
+    PROFILES("Profiles"),
+    WIDGETS("Widgets"),
 }
 
 @Composable
-private fun GithubStreakScreen(repository: SettingsRepository) {
-    val state by repository.appState.collectAsState(initial = AppState())
-    val appContext = LocalContext.current.applicationContext
-    val scope = rememberCoroutineScope()
-    var usernameInput by rememberSaveable { mutableStateOf("") }
-
-    LaunchedEffect(state.username) {
-        usernameInput = state.username
-    }
-
-    val normalizedUsername = GithubContributionClient.normalizeUsername(usernameInput)
-    val usernameIsValid = normalizedUsername.isBlank() || GithubContributionClient.isValidUsername(normalizedUsername)
+private fun GithubStreakApp(data: AppData, repository: ProfileRepository) {
+    val palette = LocalGithubPalette.current
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.background,
+        color = palette.canvasInset,
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp),
+                .windowInsetsPadding(WindowInsets.systemBars),
         ) {
-            Text(
-                text = "GitHub Streak",
-                style = MaterialTheme.typography.headlineLarge.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.primary,
-            )
+            AppHeader(profileCount = data.profiles.size)
 
-            Text(
-                text = "Public activity streak for any GitHub username. No token, no login.",
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color(0xFF4E4A3F),
-            )
-
-            StreakCard(state = state)
-
-            Card(
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFFFFFFF)),
-                modifier = Modifier.fillMaxWidth(),
+            TabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = palette.canvas,
+                contentColor = palette.fg,
             ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp),
-                ) {
-                    OutlinedTextField(
-                        value = usernameInput,
-                        onValueChange = { usernameInput = it },
-                        label = { Text("GitHub username") },
-                        singleLine = true,
-                        isError = normalizedUsername.isNotBlank() && !usernameIsValid,
-                        supportingText = {
+                HomeTab.entries.forEachIndexed { index, tab ->
+                    Tab(
+                        selected = selectedTab == index,
+                        onClick = { selectedTab = index },
+                        selectedContentColor = palette.fg,
+                        unselectedContentColor = palette.fgMuted,
+                        text = {
                             Text(
-                                text = if (usernameIsValid) {
-                                    "Example: torvalds or octocat"
-                                } else {
-                                    "Use a valid GitHub username."
-                                },
+                                text = tab.label,
+                                fontSize = 14.sp,
+                                fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal,
                             )
                         },
-                        modifier = Modifier.fillMaxWidth(),
                     )
-
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    ) {
-                        Button(
-                            enabled = normalizedUsername.isNotBlank() && usernameIsValid,
-                            onClick = {
-                                scope.launch {
-                                    repository.saveUsername(normalizedUsername)
-                                    GithubStreakWidget().updateAll(appContext)
-                                    RefreshStreakWorker.enqueuePeriodic(appContext)
-                                    RefreshStreakWorker.refreshNow(appContext)
-                                }
-                            },
-                        ) {
-                            Text("Save")
-                        }
-
-                        OutlinedButton(
-                            enabled = state.username.isNotBlank(),
-                            onClick = { RefreshStreakWorker.refreshNow(appContext) },
-                        ) {
-                            Text("Refresh")
-                        }
-
-                        TextButton(
-                            enabled = state.username.isNotBlank(),
-                            onClick = {
-                                scope.launch {
-                                    repository.saveUsername("")
-                                    GithubStreakWidget().updateAll(appContext)
-                                }
-                            },
-                        ) {
-                            Text("Clear")
-                        }
-                    }
                 }
             }
 
-            Text(
-                text = "Rule: if there is no visible public activity today and yesterday, the streak shows 0.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF6B6251),
-            )
+            Box(modifier = Modifier.fillMaxSize().background(palette.canvasInset)) {
+                when (HomeTab.entries[selectedTab]) {
+                    HomeTab.PROFILES -> ProfilesScreen(data = data, repository = repository)
+                    HomeTab.WIDGETS -> WidgetsScreen(data = data)
+                }
+            }
         }
     }
 }
 
 @Composable
-private fun StreakCard(state: AppState) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF0C2)),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
+private fun AppHeader(profileCount: Int) {
+    val palette = LocalGithubPalette.current
+    val context = LocalContext.current
+    val refreshing by RefreshStreakWorker.isRefreshing(context)
+        .collectAsState(initial = false)
+
+    Column(modifier = Modifier.fillMaxWidth().background(palette.canvas)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = mascotFor(state),
-                fontSize = 42.sp,
-                color = MaterialTheme.colorScheme.primary,
+            Image(
+                painter = painterResource(R.drawable.ic_github),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(palette.fg),
+                modifier = Modifier.size(24.dp),
             )
-            Text(
-                text = if (state.username.isBlank()) "Choose a username" else "@${state.username}",
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                color = Color(0xFF3A352C),
-            )
-            Text(
-                text = "${state.streakDays} ${if (state.streakDays == 1) "active day" else "active days"}",
-                style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold),
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = statusMessage(state),
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color(0xFF5A5246),
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Last refresh: ${lastUpdatedText(state.lastUpdatedMillis)}",
-                style = MaterialTheme.typography.labelMedium,
-                color = Color(0xFF776E5E),
-            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "GitHub Streak",
+                    color = palette.fg,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    text = when {
+                        refreshing -> "Refreshing…"
+                        profileCount == 0 -> "No profiles tracked"
+                        profileCount == 1 -> "1 profile tracked"
+                        else -> "$profileCount profiles tracked"
+                    },
+                    color = if (refreshing) palette.accent else palette.fgMuted,
+                    fontSize = 12.sp,
+                )
+            }
+            if (profileCount > 0) {
+                RefreshAllButton()
+            }
         }
+
+        Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(palette.border))
     }
 }
 
-private fun mascotFor(state: AppState): String {
-    val secondFrame = state.lastUpdatedMillis > 0L && (state.lastUpdatedMillis / 1000L) % 2L == 0L
-    return when (state.status) {
-        StreakStatus.NEEDS_USERNAME -> if (secondFrame) "(?o?)" else "(?_?)"
-        StreakStatus.PENDING -> if (secondFrame) "(._.)" else "(. .)"
-        StreakStatus.ACTIVE_TODAY -> if (secondFrame) "(^o^)" else "(^_^)"
-        StreakStatus.ACTIVE_YESTERDAY -> if (secondFrame) "(o_o;)" else "(o_o)"
-        StreakStatus.RESET -> if (secondFrame) "(-_-)" else "(z_z)"
-        StreakStatus.ERROR -> if (secondFrame) "(x_x)" else "(!)"
+@Composable
+private fun RefreshAllButton() {
+    val palette = LocalGithubPalette.current
+    val context = LocalContext.current
+
+    androidx.compose.material3.IconButton(
+        onClick = { RefreshStreakWorker.refreshNow(context) },
+    ) {
+        Icon(
+            imageVector = Icons.Filled.Refresh,
+            contentDescription = "Refresh all profiles",
+            tint = palette.fgMuted,
+            modifier = Modifier.size(20.dp),
+        )
     }
-}
-
-private fun statusMessage(state: AppState): String = when (state.status) {
-    StreakStatus.NEEDS_USERNAME -> "Add a username to start."
-    StreakStatus.PENDING -> "Saved. Refreshing public GitHub activity soon."
-    StreakStatus.ACTIVE_TODAY -> "Active today. The streak is safe."
-    StreakStatus.ACTIVE_YESTERDAY -> "No public activity today yet. Yesterday still keeps it alive."
-    StreakStatus.RESET -> "Two inactive days detected, so the streak is 0."
-    StreakStatus.ERROR -> "Refresh failed: ${state.errorMessage ?: "unknown error"}"
-}
-
-private fun lastUpdatedText(millis: Long): String {
-    if (millis <= 0L) return "never"
-    return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(millis))
 }

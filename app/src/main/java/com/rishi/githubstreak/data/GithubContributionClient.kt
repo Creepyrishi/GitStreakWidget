@@ -12,22 +12,29 @@ import okhttp3.Request
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 
+/** Parsed contribution calendar for one user. */
+data class ContributionSnapshot(
+    val days: List<ContributionDay>,
+    val reportedTotal: Int?,
+)
+
 class GithubContributionClient(
     private val okHttpClient: OkHttpClient = sharedClient,
 ) {
-    suspend fun fetchPublicContributionDays(username: String): List<ContributionDay> = withContext(Dispatchers.IO) {
+    suspend fun fetchPublicContributions(username: String): ContributionSnapshot = withContext(Dispatchers.IO) {
         val safeUsername = validateUsername(username)
+        // No date parameters: GitHub answers a `to=` request with that whole calendar year
+        // (future days included), while the bare URL returns the trailing 53 weeks ending today.
         val url = "https://github.com/".toHttpUrl().newBuilder()
             .addPathSegment("users")
             .addPathSegment(safeUsername)
             .addPathSegment("contributions")
-            .addQueryParameter("to", LocalDate.now().toString())
             .build()
 
         val request = Request.Builder()
             .url(url)
             .header("Accept", "text/html,application/xhtml+xml")
-            .header("User-Agent", "GithubStreakWidget/1.0")
+            .header("User-Agent", "GithubStreakWidget/2.0")
             .build()
 
         okHttpClient.newCall(request).execute().use { response ->
@@ -38,11 +45,14 @@ class GithubContributionClient(
                 throw IOException("GitHub request failed: HTTP ${response.code}")
             }
 
-            val html = response.body?.string().orEmpty()
-            val days = parseContributionDays(html)
-            check(days.isNotEmpty()) { "Could not read GitHub public contribution calendar" }
-            days
+            parse(response.body?.string().orEmpty())
         }
+    }
+
+    internal fun parse(html: String): ContributionSnapshot {
+        val days = parseContributionDays(html)
+        check(days.isNotEmpty()) { "Could not read GitHub public contribution calendar" }
+        return ContributionSnapshot(days = days, reportedTotal = parseReportedTotal(html))
     }
 
     private fun parseContributionDays(html: String): List<ContributionDay> {
@@ -57,38 +67,40 @@ class GithubContributionClient(
                     ?.let { dateText -> runCatching { LocalDate.parse(dateText) }.getOrNull() }
                     ?: return@mapNotNull null
 
-                ContributionDay(
-                    date = date,
-                    active = isActiveDay(
-                        element = element,
-                        tooltip = tooltipByTargetId[element.id()],
-                    ),
+                val (count, level) = readCountAndLevel(
+                    element = element,
+                    tooltip = tooltipByTargetId[element.id()],
                 )
+                ContributionDay(date = date, count = count, level = level)
             }
             .groupBy { it.date }
-            .map { (date, entries) -> ContributionDay(date, entries.any { it.active }) }
+            .map { (date, entries) ->
+                ContributionDay(
+                    date = date,
+                    count = entries.maxOf { it.count },
+                    level = entries.maxOf { it.level },
+                )
+            }
             .sortedBy { it.date }
     }
 
-    private fun isActiveDay(element: Element, tooltip: String?): Boolean {
-        val count = listOf("data-count", "data-contribution-count")
+    /** GitHub renders "1,234 contributions in the last year" above the calendar. */
+    private fun parseReportedTotal(html: String): Int? = Regex(
+        "([0-9][0-9,]*)\\s+contributions?\\s+in\\s+the\\s+last\\s+year",
+        RegexOption.IGNORE_CASE,
+    )
+        .find(html)
+        ?.groupValues
+        ?.getOrNull(1)
+        ?.toContributionIntOrNull()
+
+    /**
+     * Returns the contribution count and the 0..4 colour level for a calendar cell. GitHub has
+     * moved these between attributes and tooltips over the years, so every known source is tried.
+     */
+    private fun readCountAndLevel(element: Element, tooltip: String?): Pair<Int, Int> {
+        val attributeCount = listOf("data-count", "data-contribution-count")
             .firstNotNullOfOrNull { attribute -> element.attr(attribute).toContributionIntOrNull() }
-        if (count != null) {
-            return count > 0
-        }
-
-        val level = element.attr("data-level").toIntOrNull()
-        if (level != null) {
-            return level > 0
-        }
-
-        val className = element.className().lowercase(Locale.US)
-        if (className.contains("contribution-level-0")) {
-            return false
-        }
-        if (Regex("contribution-level-[1-4]").containsMatchIn(className)) {
-            return true
-        }
 
         val label = sequenceOf(
             element.attr("aria-label"),
@@ -96,31 +108,48 @@ class GithubContributionClient(
             tooltip.orEmpty(),
         ).firstOrNull { it.isNotBlank() }
 
-        return label?.meansActiveContributionDay() == true
+        val count = attributeCount ?: label?.contributionCountOrNull()
+
+        val level = element.attr("data-level").toIntOrNull()
+            ?: element.className().lowercase(Locale.US).let { className ->
+                Regex("contribution-level-([0-4])").find(className)
+                    ?.groupValues
+                    ?.getOrNull(1)
+                    ?.toIntOrNull()
+            }
+            ?: count?.let { estimateLevel(it) }
+            ?: 0
+
+        return (count ?: if (level > 0) 1 else 0) to level.coerceIn(0, MAX_CONTRIBUTION_LEVEL)
+    }
+
+    /** Fallback bucketing when GitHub does not expose data-level. */
+    private fun estimateLevel(count: Int): Int = when {
+        count <= 0 -> 0
+        count < 3 -> 1
+        count < 6 -> 2
+        count < 10 -> 3
+        else -> 4
     }
 
     private fun String.toContributionIntOrNull(): Int? = trim()
         .replace(",", "")
         .toIntOrNull()
 
-    private fun String.meansActiveContributionDay(): Boolean {
+    private fun String.contributionCountOrNull(): Int? {
         val normalized = trim().lowercase(Locale.US)
-        if (normalized.isBlank() || normalized.startsWith("no contribution")) {
-            return false
-        }
+        if (normalized.isBlank()) return null
+        if (normalized.startsWith("no contribution")) return 0
 
         val count = Regex("(^|\\s)([0-9][0-9,]*)\\s+contribution")
             .find(normalized)
             ?.groupValues
             ?.getOrNull(2)
-            ?.replace(",", "")
-            ?.toIntOrNull()
+            ?.toContributionIntOrNull()
+        if (count != null) return count
 
-        if (count != null) {
-            return count > 0
-        }
-
-        return normalized.contains("contribution") && !normalized.contains("no contributions")
+        if (normalized.contains("no contributions")) return 0
+        return null
     }
 
     companion object {
@@ -132,7 +161,10 @@ class GithubContributionClient(
             .callTimeout(30, TimeUnit.SECONDS)
             .build()
 
-        fun normalizeUsername(username: String): String = username.trim().removePrefix("@")
+        fun normalizeUsername(username: String): String = username.trim()
+            .removePrefix("@")
+            .removeSuffix("/")
+            .substringAfterLast('/')
 
         fun isValidUsername(username: String): Boolean = usernamePattern.matches(normalizeUsername(username))
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.GithubStreak" parent="android:style/Theme.Material.Light.NoActionBar">
+    <style name="Theme.GithubStreak" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:navigationBarColor">@color/gh_canvas_inset</item>
         <item name="android:statusBarColor">@color/gh_canvas</item>
         <item name="android:windowBackground">@color/gh_canvas_inset</item>
-        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 </resources>

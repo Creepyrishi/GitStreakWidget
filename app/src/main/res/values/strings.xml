@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">GitHub Streak</string>
-    <string name="widget_name">GitHub Streak Widget</string>
+
+    <string name="streak_widget_name">GitHub Streak</string>
+    <string name="streak_widget_description">Current streak for one tracked GitHub profile.</string>
+    <string name="calendar_widget_name">GitHub Contributions</string>
+    <string name="calendar_widget_description">The contribution calendar for one tracked GitHub profile.</string>
+
+    <string name="preview_username" translatable="false">octocat</string>
+    <string name="preview_streak_days" translatable="false">42</string>
+    <string name="preview_streak_label">days streak</string>
 </resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- GitHub Primer dark tokens. -->
+<resources>
+    <color name="gh_canvas">#0D1117</color>
+    <color name="gh_canvas_subtle">#161B22</color>
+    <color name="gh_canvas_inset">#010409</color>
+    <color name="gh_border">#3D444D</color>
+    <color name="gh_fg">#F0F6FC</color>
+    <color name="gh_fg_muted">#9198A1</color>
+    <color name="gh_fg_subtle">#6E7681</color>
+    <color name="gh_accent">#4493F8</color>
+    <color name="gh_success">#3FB950</color>
+    <color name="gh_attention">#D29922</color>
+    <color name="gh_danger">#F85149</color>
+
+    <color name="gh_level_0">#151B23</color>
+    <color name="gh_level_1">#033A16</color>
+    <color name="gh_level_2">#196C2E</color>
+    <color name="gh_level_3">#2EA043</color>
+    <color name="gh_level_4">#56D364</color>
+</resources>
