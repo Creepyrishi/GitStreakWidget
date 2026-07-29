@@ -37,6 +37,51 @@ class ContributionGraphLayoutTest {
     }
 
     @Test
+    fun `a taller widget spends the room on bigger cells, not empty space`() {
+        // Same width, twice the height: a year of squares cannot get taller without getting
+        // wider too, so the extra room has to buy cell size by dropping the oldest weeks.
+        val short = ContributionGraphLayout.fit(
+            calendar = fullYear,
+            endDate = today,
+            widthPx = 900f,
+            heightPx = 120f,
+            density = 3f,
+            showMonthLabels = false,
+            showWeekdayLabels = false,
+        )
+        val tall = ContributionGraphLayout.fit(
+            calendar = fullYear,
+            endDate = today,
+            widthPx = 900f,
+            heightPx = 380f,
+            density = 3f,
+            showMonthLabels = false,
+            showWeekdayLabels = false,
+        )
+
+        val shortCell = short.cells.first().size
+        val tallCell = tall.cells.first().size
+        assertTrue("expected bigger cells, $shortCell -> $tallCell", tallCell > shortCell * 1.5f)
+        assertTrue("expected fewer weeks", distinctColumns(tall) < distinctColumns(short))
+    }
+
+    @Test
+    fun `keeps around eight months of history even on a tall widget`() {
+        val tall = ContributionGraphLayout.fit(
+            calendar = fullYear,
+            endDate = today,
+            widthPx = 900f,
+            heightPx = 600f,
+            density = 3f,
+            showMonthLabels = false,
+            showWeekdayLabels = false,
+        )
+
+        val columns = distinctColumns(tall)
+        assertTrue("expected at least ~8 months, got $columns weeks", columns >= 34)
+    }
+
+    @Test
     fun `a narrow widget drops the oldest weeks instead of shrinking to nothing`() {
         val layout = ContributionGraphLayout.fit(
             calendar = fullYear,

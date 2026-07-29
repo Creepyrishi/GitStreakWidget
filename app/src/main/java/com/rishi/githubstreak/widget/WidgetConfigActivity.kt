@@ -128,7 +128,7 @@ private fun WidgetConfigScreen(
     var loaded by remember { mutableStateOf(false) }
     var selectedProfileId by remember { mutableStateOf<String?>(null) }
     var theme by remember { mutableStateOf(WidgetThemeOption.SYSTEM) }
-    var showLabels by remember { mutableStateOf(true) }
+    var showChrome by remember { mutableStateOf(true) }
 
     // Pre-fill from the widget's existing state when reconfiguring.
     androidx.compose.runtime.LaunchedEffect(appWidgetId) {
@@ -139,7 +139,7 @@ private fun WidgetConfigScreen(
         if (existing != null) {
             selectedProfileId = existing.profileId
             theme = existing.theme
-            showLabels = existing.showLabels
+            showChrome = existing.showChrome
         }
         loaded = true
     }
@@ -218,16 +218,16 @@ private fun WidgetConfigScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
-                            Text("Header and labels", color = palette.fg, fontSize = 14.sp)
+                            Text("Name and streak line", color = palette.fg, fontSize = 14.sp)
                             Text(
-                                text = "Turn off for a bare graph on small widgets.",
+                                text = "Turn off to give the whole widget to the graph.",
                                 color = palette.fgMuted,
                                 fontSize = 12.sp,
                             )
                         }
                         Switch(
-                            checked = showLabels,
-                            onCheckedChange = { showLabels = it },
+                            checked = showChrome,
+                            onCheckedChange = { showChrome = it },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.White,
                                 checkedTrackColor = palette.successEmphasis,
@@ -254,7 +254,7 @@ private fun WidgetConfigScreen(
                             config = WidgetConfig(
                                 profileId = chosen,
                                 theme = theme,
-                                showLabels = showLabels,
+                                showChrome = showChrome,
                             ),
                         )
                         onSaved()

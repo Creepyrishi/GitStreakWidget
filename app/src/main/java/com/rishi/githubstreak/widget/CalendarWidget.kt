@@ -55,7 +55,7 @@ class CalendarWidget : GlanceAppWidget() {
                 profile = profile,
                 colors = WidgetColors(config.theme),
                 dark = config.theme.isDark(context),
-                showHeader = config.showLabels,
+                showHeader = config.showChrome,
             )
         }
     }
@@ -107,7 +107,6 @@ private fun CalendarWidgetContent(
                         profile = profile,
                         colors = colors,
                         dark = dark,
-                        showLabels = showHeader,
                         heightDp = availableHeightDp - if (showFooter) FOOTER_DP else 0f,
                     )
                 }
@@ -179,7 +178,6 @@ private fun ContributionGraphImage(
     profile: Profile,
     colors: WidgetColors,
     dark: Boolean,
-    showLabels: Boolean,
     heightDp: Float,
 ) {
     val context = LocalContext.current
@@ -196,8 +194,10 @@ private fun ContributionGraphImage(
             heightPx = (heightDp * density).roundToInt(),
             density = density,
             dark = dark,
-            showMonthLabels = showLabels,
-            showWeekdayLabels = showLabels,
+            // Month and weekday captions cost more room than they earn at widget scale; the
+            // squares get that space instead.
+            showMonthLabels = false,
+            showWeekdayLabels = false,
         )
     }
 

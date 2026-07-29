@@ -75,19 +75,19 @@ enum class WidgetKind(val title: String, val summary: String) {
 data class WidgetConfig(
     val profileId: String? = null,
     val theme: WidgetThemeOption = WidgetThemeOption.SYSTEM,
-    val showLabels: Boolean = true,
+    val showChrome: Boolean = true,
 )
 
 /** Per-widget-instance settings, stored in each widget's own Glance state. */
 object WidgetConfigStore {
     private val ProfileIdKey = stringPreferencesKey("bound_profile_id")
     private val ThemeKey = stringPreferencesKey("widget_theme")
-    private val ShowLabelsKey = booleanPreferencesKey("show_labels")
+    private val ShowChromeKey = booleanPreferencesKey("show_labels")
 
     fun read(preferences: Preferences): WidgetConfig = WidgetConfig(
         profileId = preferences[ProfileIdKey]?.takeIf { it.isNotBlank() },
         theme = WidgetThemeOption.from(preferences[ThemeKey]),
-        showLabels = preferences[ShowLabelsKey] ?: true,
+        showChrome = preferences[ShowChromeKey] ?: true,
     )
 
     suspend fun read(context: Context, glanceId: GlanceId): WidgetConfig =
@@ -102,7 +102,7 @@ object WidgetConfigStore {
                 preferences[ProfileIdKey] = profileId
             }
             preferences[ThemeKey] = config.theme.name
-            preferences[ShowLabelsKey] = config.showLabels
+            preferences[ShowChromeKey] = config.showChrome
         }
     }
 }

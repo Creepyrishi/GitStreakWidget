@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A contribution grid with a streak climbing through it. Tiers are separated by alpha so
+     the mark survives being tinted to a single colour in widgets. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.22"
+        android:pathData="M1.25,0.10h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.22"
+        android:pathData="M1.25,6.50h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.22"
+        android:pathData="M1.25,12.90h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="1.0"
+        android:pathData="M1.25,19.30h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.22"
+        android:pathData="M7.65,0.10h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.22"
+        android:pathData="M7.65,6.50h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="1.0"
+        android:pathData="M7.65,12.90h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.62"
+        android:pathData="M7.65,19.30h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.22"
+        android:pathData="M14.05,0.10h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="1.0"
+        android:pathData="M14.05,6.50h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.62"
+        android:pathData="M14.05,12.90h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.22"
+        android:pathData="M14.05,19.30h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="1.0"
+        android:pathData="M20.45,0.10h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.62"
+        android:pathData="M20.45,6.50h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.22"
+        android:pathData="M20.45,12.90h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+    <path
+        android:fillColor="@color/gh_fg"
+        android:fillAlpha="0.22"
+        android:pathData="M20.45,19.30h2.30a1.15,1.15 0 0 1 1.15,1.15v2.30a1.15,1.15 0 0 1 -1.15,1.15h-2.30a1.15,1.15 0 0 1 -1.15,-1.15v-2.30a1.15,1.15 0 0 1 1.15,-1.15z" />
+</vector>

@@ -79,20 +79,21 @@ object ContributionGraphLayout {
                 return@forEach
             }
 
-            val stepFromHeight = availableHeight / ROWS
-            val stepForFullYear = availableWidth / MAX_WEEKS
-            val step: Float
-            val weeks: Int
-
-            if (stepForFullYear >= MIN_FULL_YEAR_STEP_DP * density) {
-                step = min(stepFromHeight, stepForFullYear)
-                weeks = MAX_WEEKS
-            } else {
-                step = stepFromHeight
-                weeks = floor(availableWidth / step).toInt().coerceIn(1, MAX_WEEKS)
+            // Cells grow until they fill the height, so a taller widget gets bigger squares
+            // rather than a thin band floating in dead space. Growth stops once fewer than
+            // MIN_VISIBLE_WEEKS would remain, and never leaves them smaller than MIN_STEP_DP.
+            var step = min(availableHeight / ROWS, availableWidth / MIN_VISIBLE_WEEKS)
+            if (step < MIN_STEP_DP * density) {
+                step = min(availableHeight / ROWS, MIN_STEP_DP * density)
             }
-
             if (step <= 0f) return@forEach
+
+            var weeks = floor(availableWidth / step).toInt().coerceIn(1, MAX_WEEKS)
+            // Within a few columns of a whole year, give up those few pixels and show all of it.
+            if (weeks in (MAX_WEEKS - FULL_YEAR_SNAP) until MAX_WEEKS) {
+                weeks = MAX_WEEKS
+                step = availableWidth / MAX_WEEKS
+            }
 
             return build(
                 calendar = calendar,
@@ -227,8 +228,14 @@ object ContributionGraphLayout {
     private const val GAP_RATIO = 0.16f
     private const val LABEL_SP = 9f
 
-    /** Below this the whole year is unreadable mush, so crop columns instead. */
-    private const val MIN_FULL_YEAR_STEP_DP = 3.5f
+    /** Roughly eight months. Cells stop growing once dropping below this much history. */
+    private const val MIN_VISIBLE_WEEKS = 35
+
+    /** Floor on the cell pitch, for widgets too small to honour MIN_VISIBLE_WEEKS. */
+    private const val MIN_STEP_DP = 5f
+
+    /** How many columns short of a full year is worth shrinking the cells to recover. */
+    private const val FULL_YEAR_SNAP = 6
 
     /** Largest slice of the widget a label gutter may take before labels are dropped. */
     private const val MAX_GUTTER_SHARE = 0.3f
