@@ -4,6 +4,11 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// Releases are side-loaded from GitHub rather than shipped through Play, and 1.0 went out signed
+// with this machine's Android debug key. Reusing it keeps new builds installable on top of copies
+// people already have; a fresh key would make every update a uninstall-and-lose-your-data affair.
+val sideloadKeystore = File(System.getProperty("user.home"), ".android/debug.keystore")
+
 android {
     namespace = "com.rishi.githubstreak"
     compileSdk = 35
@@ -14,6 +19,26 @@ android {
         targetSdk = 35
         versionCode = 2
         versionName = "2.0"
+    }
+
+    signingConfigs {
+        if (sideloadKeystore.exists()) {
+            create("sideload") {
+                storeFile = sideloadKeystore
+                storePassword = "android"
+                keyAlias = "androiddebugkey"
+                keyPassword = "android"
+            }
+        }
+    }
+
+    buildTypes {
+        getByName("release") {
+            isMinifyEnabled = false
+            // Null on a machine with no debug keystore; assembleRelease then leaves the APK
+            // unsigned instead of failing the build.
+            signingConfig = signingConfigs.findByName("sideload")
+        }
     }
 
     buildFeatures {

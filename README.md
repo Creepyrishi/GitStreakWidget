@@ -130,7 +130,17 @@ Required tools:
 - Android build tools `35.0.0`
 - Gradle `8.10.2` or compatible
 
-Debug build:
+Release build — this is the one to ship:
+
+```bash
+gradle :app:assembleRelease --no-daemon --max-workers=2
+```
+
+```text
+app/build/outputs/apk/release/app-release.apk
+```
+
+Debug build, for development:
 
 ```bash
 gradle :app:assembleDebug --no-daemon --max-workers=2
@@ -142,13 +152,7 @@ Unit tests:
 gradle :app:testDebugUnitTest --no-daemon --max-workers=2
 ```
 
-The debug APK is generated at:
-
-```text
-app/build/outputs/apk/debug/app-debug.apk
-```
-
-For GitHub Releases, upload the APK asset as:
+For GitHub Releases, upload the release APK as:
 
 ```text
 github-streak-widget.apk
@@ -157,8 +161,18 @@ github-streak-widget.apk
 Install on a connected phone:
 
 ```bash
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb install -r app/build/outputs/apk/release/app-release.apk
 ```
+
+### Signing
+
+`1.0` shipped signed with the Android debug key in `~/.android/debug.keystore`, so `assembleRelease`
+reuses it. Android refuses to install an update signed with a different key, and swapping keys would
+force everyone to uninstall first and lose their tracked profiles.
+
+Keep that keystore backed up. If it is lost, future builds cannot update existing installs. On a
+machine without it the release build still runs, but produces an unsigned APK that Android will not
+install.
 
 ## Colab Build
 
