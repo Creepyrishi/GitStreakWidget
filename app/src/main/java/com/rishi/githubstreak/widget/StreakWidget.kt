@@ -157,7 +157,7 @@ internal fun WidgetHeader(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Image(
-            provider = ImageProvider(R.drawable.ic_streak_mark),
+            provider = ImageProvider(R.drawable.ic_github),
             contentDescription = null,
             colorFilter = ColorFilter.tint(colors.fgMuted),
             modifier = GlanceModifier.size(14.dp),
@@ -200,7 +200,7 @@ internal fun EmptyWidgetBody(colors: WidgetColors, message: String) {
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
-            provider = ImageProvider(R.drawable.ic_streak_mark),
+            provider = ImageProvider(R.drawable.ic_github),
             contentDescription = null,
             colorFilter = ColorFilter.tint(colors.fgMuted),
             modifier = GlanceModifier.size(22.dp),

@@ -139,7 +139,7 @@ private fun AppHeader(profileCount: Int) {
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Image(
-                painter = painterResource(R.drawable.ic_streak_mark),
+                painter = painterResource(R.drawable.ic_github),
                 contentDescription = null,
                 colorFilter = ColorFilter.tint(palette.fg),
                 modifier = Modifier.size(24.dp),

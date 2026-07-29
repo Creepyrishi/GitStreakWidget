@@ -16,7 +16,7 @@
             android:layout_width="14dp"
             android:layout_height="14dp"
             android:contentDescription="@null"
-            android:src="@drawable/ic_streak_mark" />
+            android:src="@drawable/ic_github" />
 
         <TextView
             android:layout_width="0dp"
