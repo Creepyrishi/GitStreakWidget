@@ -17,9 +17,16 @@ This app is vibe coded.
 ## Screenshots
 
 <p>
-  <img src="imgs/inapp_image.jpeg" alt="GitHub Streak app screen" width="280">
-  <img src="imgs/home.jpeg" alt="GitHub Streak home-screen widget" width="280">
+  <img src="imgs/home.jpeg" alt="Streak and contribution-graph widgets for two profiles" width="240">
+  <img src="imgs/inapp_image.jpeg" alt="Profiles tab" width="240">
+  <img src="imgs/app_dark.jpeg" alt="Profiles tab in dark mode" width="240">
 </p>
+<p>
+  <img src="imgs/widget_manager.jpeg" alt="Widgets tab listing every placed widget" width="240">
+</p>
+
+Left to right: two streak widgets and two contribution-graph widgets tracking different accounts,
+the Profiles tab, the same screen in dark mode, and the Widgets tab.
 
 ## Features
 
