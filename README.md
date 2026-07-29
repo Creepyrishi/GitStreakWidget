@@ -4,7 +4,17 @@ Simple Android app and home-screen widget for showing a public GitHub activity s
 
 The app does not need a GitHub token, login, or backend server. It reads the public GitHub contribution calendar that anyone can see on a GitHub profile.
 
-This app is vibe coded.
+## Why this exists, and how it was built
+
+I wanted a home-screen streak counter that did not need a token, a login, or a
+server. I could not find one I liked, so I built the one I wanted.
+
+**This app was built with heavy AI assistance** — vibe coded, to put it plainly.
+I decided what it should do, tested it on my own phone, and shipped it. I did
+not write most of this code by hand and I am not going to imply otherwise.
+
+It is small, it works, and the APK is below. Read the source before trusting it
+with anything that matters.
 
 ## Download
 
